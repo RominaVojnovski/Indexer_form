@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+		<meta name="viewport" content="width=device-width, initial-scale=1"> 
+		<title>File Indexer</title>
+		<link rel="stylesheet" type="text/css" href="css/normalize.css" />
+		<link rel="stylesheet" type="text/css" href="css/component.css" />
+        <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+		<script src="js/modernizr.custom.js"></script>
+	</head>
+	<body>
+		<div class="container">
+
+			<header class="header">
+				<h1>File Indexer</h1>	
+			</header>
+			<section>
+				<div id='loadingmessage' style='display:none'>
+                    <img src='img/Preloader_3.gif'/>
+                </div>
+                <form id="theForm" class="simform" autocomplete="off" action="test.php" method="post">
+					<div class="simform-inner">
+						<ol class="questions">
+							<li>
+								<span><label for="q1">What is the path/url of file to index?</label></span>
+								<input id="q1" name="q1" type="text"/>
+							</li>
+						</ol><!-- /questions -->
+						<button class="submit" type="submit">Send answers</button>
+						<div class="controls">
+							<button class="next"></button>
+							<div class="progress"></div>
+							<span class="number">
+								<span class="number-current"></span>
+								<span class="number-total"></span>
+							</span>
+							<span class="error-message"></span>
+						</div><!-- / controls -->
+					</div><!-- /simform-inner -->
+				</form><!-- /simform -->
+                <div class="headdiv"></div>
+                <div class="outdiv"></div>
+			</section>
+
+		</div><!-- /container -->
+		<script src="js/classie.js"></script>
+		<script src="js/stepsForm.js"></script>
+		<script>
+			var theForm = document.getElementById( 'theForm' );
+
+			new stepsForm( theForm, {
+				onSubmit : function( form ) {
+					// hide form
+					classie.addClass( theForm.querySelector( '.simform-inner' ), 'hide' );
+                    $('#loadingmessage').show();
+                    var que1 = $("#q1").val();
+                    
+                    var messageEl1 = $('.headdiv');
+                    var messageEl2 = $( '.outdiv' );
+                    
+                    var headmessage=  '<h2>HEADER INFO</h2><br/><table class="centro"><tr><td>category</td><td>words</td></tr>';
+                    var finalmessage= '<br/><br/><table class="centro">';
+                    
+                 
+                    
+                    //ajax call for page word count info (word:count)
+                    $.ajax({
+                        url: 'php/test.php',
+                        type: 'post',
+                        data: {'page': que1, 'kind': 'pinfo'},
+                        cache: false,
+                        success: function(json){
+                            
+                            $.each(json, function(i,item){
+                                if(typeof item == 'object'){   
+                                    finalmessage += '<tr><td>'+Object.keys(item)+'</td>';
+                                   
+                                    for(key in item){
+                                        if(item.hasOwnProperty(key)){
+                                        finalmessage += '<td>'+ item[key]+'</td></tr>';
+                                        }
+                                    }
+                                   
+                                }
+                                else{
+                                    return false;
+                                }
+                            })//end $.each() loop
+                            
+                            finalmessage += '</table>';
+                            $(".simform").remove();
+                            //$('#loadingmessage').hide();
+                            setTimeout(function(){$('#loadingmessage').hide();},1000)
+                            
+                            setTimeout(function(){$(".outdiv").append(finalmessage)},1100);
+					        
+           
+                        },
+                        error: function(xhr, desc, err){
+                            console.log(xhr);
+                            console.log("Details: " + desc + "\nerror:" + err);
+                        }
+                        
+                    });//end page info ajax call
+   
+				}
+			} );
+		</script>
+	</body>
+</html>
